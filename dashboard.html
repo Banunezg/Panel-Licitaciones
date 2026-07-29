@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Ofertas - Portales</title>
+    
+    <!-- Hojas de estilo: Google Fonts y FullCalendar -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    
+    <!-- Librería FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/es.global.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --background: #f1f5f9;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --warning: #f97316;
+            
+            /* Colores de los Estados */
+            --status-process: #2563eb;
+            --status-accepted: #10b981;
+            --status-lost: #f43f5e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0; padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            flex-direction: row; /* Por defecto en PC va de lado a lado */
+        }
+
+        /* BARRA LATERAL (SIDEBAR) RESPONSIVE */
+        .sidebar {
+            width: 340px;
+            background-color: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            padding: 20px; box-sizing: border-box;
+            height: 100vh;
+            flex-shrink: 0;
+        }
+
+        .profile-section {
+            text-align: center; padding-bottom: 12px;
+            border-bottom: 1px solid var(--border); margin-bottom: 12px;
+        }
+
+        .profile-avatar {
+            width: 50px; height: 50px; background-color: #dbeafe;
+            color: var(--primary); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 700; margin: 0 auto 6px;
+        }
+
+        .profile-name { font-size: 15px; font-weight: 600; margin: 0; }
+        .profile-role { font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0; }
+
+        /* CONVERSIÓN FINANCIERA */
+        .finance-panel {
+            background-color: #f8fafc; border: 1px solid var(--border);
+            border-radius: 8px; padding: 10px; margin-bottom: 14px;
+        }
+        .finance-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+        .finance-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; font-weight: 500; }
+        .fin-accepted { color: #047857; font-weight: 600; }
+        .fin-process { color: #1d4ed8; font-weight: 600; }
+
+        /* BUSCADOR Y FILTROS */
+        .filter-panel { margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px; }
+        .filter-input {
+            width: 100%; padding: 6px 10px; border: 1px solid var(--border);
+            border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 13px;
+        }
+
+        /* LISTADO DE OFERTAS */
+        .offers-list-container { flex: 1; overflow-y: auto; margin-bottom: 14px; padding-right: 2px; }
+        .sidebar-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+        
+        .offer-item {
+            padding: 10px; border: 1px solid var(--border); border-radius: 6px;
+            margin-bottom: 6px; cursor: pointer; transition: all 0.2s; background-color: #fafafa;
+            position: relative;
+        }
+        .offer-item:hover { background-color: #f1f5f9; border-color: #cbd5e1; }
+        .offer-item-title { font-size: 13px; font-weight: 600; margin: 0 0 4px 0; width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .offer-item-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+        
+        /* CONTADOR DE DÍAS RESTANTES */
+        .days-badge {
+            position: absolute; top: 10px; right: 10px;
+            font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+        }
+        .days-normal { background-color: #e2e8f0; color: #475569; }
+        .days-warning { background-color: #ffedd5; color: #c2410c; }
+        .days-danger { background-color: #fee2e2; color: #b91c1c; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; }
+        }
+
+        .badge-status { padding: 1px 5px; border-radius: 4px; font-weight: 600; color: white; font-size: 9px; }
+
+        .sidebar-actions { display: flex; flex-direction: column; gap: 8px; }
+
+        /* ÁREA PRINCIPAL CONTENEDORA */
+        .main-content {
+            flex: 1; padding: 20px; box-sizing: border-box; overflow-y: auto; height: 100vh;
+        }
+        .calendar-card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+
+        /* BOTONES */
+        .btn-primary { background-color: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: inherit; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-logout { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 8px; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: inherit; font-size: 13px; }
+        .btn-logout:hover { background-color: var(--danger); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: inherit; }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+        .modal-footer { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+
+        /* VENTANA MODAL RESPONSIVE */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 1000; padding: 12px; box-sizing: border-box; }
+        .modal-content { background: var(--surface); padding: 20px; border-radius: 8px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); box-sizing: border-box;}
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .modal-header h2 { margin: 0; font-size: 16px; }
+        .close-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 500; margin-bottom: 3px; color: #475569; }
+        .form-group input, .form-group select { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
+        
+        .fc-event { cursor: pointer; padding: 1px 3px; font-size: 12px; }
+
+        /* -------------------------------------------
+           MEDIA QUERIES PARA ADAPTACIÓN EN CELULARES 
+        ------------------------------------------- */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Apila barra lateral arriba y calendario abajo */
+                overflow-y: auto;
+                height: auto;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 16px;
+            }
+            .offers-list-container {
+                max-height: 200px; /* Evita que la lista colapse toda la pantalla del teléfono */
+            }
+            .main-content {
+                width: 100%;
+                height: auto;
+                padding: 12px;
+            }
+            .calendar-card {
+                padding: 10px;
+            }
+            /* Optimizar tamaño del toolbar del calendario en pantallas chicas */
+            .fc .fc-toolbar {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        if (localStorage.getItem('logged_in') !== 'true') {
+            window.location.href = 'index.html';                
+        }
+    </script>
+
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <aside class="sidebar">
+        <div class="profile-section">
+            <div class="profile-avatar">A</div>
+            <h2 class="profile-name">Administrador</h2>
+            <p class="profile-role">Gestor de Licitaciones</p>
+        </div>
+
+        <!-- Conversión Financiera -->
+        <div class="finance-panel">
+            <div class="finance-title">Conversión Financiera</div>
+            <div class="finance-row">
+                <span>Adjudicado (Aceptado):</span>
+                <span id="fin-accepted" class="fin-accepted">$0</span>
+            </div>
+            <div class="finance-row">
+                <span>En Juego (En Proceso):</span>
+                <span id="fin-process" class="fin-process">$0</span>
+            </div>
+        </div>
+
+        <!-- Buscador Global y Filtro de Trabajador -->
+        <div class="filter-panel">
+            <input type="text" id="searchGlobal" class="filter-input" placeholder="🔍 Buscar por oferta o portal...">
+            <select id="filterWorker" class="filter-input">
+                <option value="">👤 Todos los trabajadores</option>
+            </select>
+        </div>
+
+        <div class="sidebar-title">Bandeja de Ofertas</div>
+        <div class="offers-list-container" id="offersList"></div>
+
+        <div class="sidebar-actions">
+            <button class="btn-primary" id="openModalBtn">+ Nueva Oferta</button>
+            <button class="btn-logout" id="logoutBtn">Cerrar Sesión</button>
+        </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="main-content">
+        <div class="calendar-card">
+            <div id="calendar"></div>
+        </div>
+    </main>
+
+    <!-- VENTANA MODAL (FORMULARIO LIMPIO) -->
+    <div class="modal" id="offerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Registrar Nueva Oferta</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <form id="offerForm">
+                <input type="hidden" id="offerId">
+
+                <div class="form-group">
+                    <label for="portal">Portal de Compras</label>
+                    <select id="portal" required>
+                        <option value="Mercado Público">Mercado Público</option>
+                        <option value="SAP Ariba">SAP Ariba</option>
+                        <option value="Asmar">Asmar</option>
+                        <option value="Coupa">Coupa</option>
+                        <option value="Otro">Otro Portal</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Nombre de la Oferta / ID Licitación</label>
+                    <input type="text" id="title" placeholder="Ej: Adquisición de servidores" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="worker">Trabajador Responsable</label>
+                    <input type="text" id="worker" placeholder="Ej: Juan Pérez" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Monto de la Oferta ($)</label>
+                    <input type="number" id="amount" placeholder="Ej: 500000" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Estado Actual</label>
+                    <select id="status" required>
+                        <option value="En Proceso">En Proceso</option>
+                        <option value="Aceptado">Aceptado</option>
+                        <option value="Perdido">Perdido</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dateParticipation">Fecha de Participación (Envío)</label>
+                    <input type="date" id="dateParticipation" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate">Fecha de Término / Cierre</label>
+                    <input type="date" id="endDate" required>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-danger" id="deleteOfferBtn" style="display: none;">Eliminar</button>
+                    <button type="submit" class="btn-primary" id="saveOfferBtn" style="flex: 1;">Guardar Oferta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('logged_in');
+                window.location.href = 'index.html';
+            });
+
+            const modal = document.getElementById('offerModal');
+            const openModalBtn = document.getElementById('openModalBtn');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const deleteOfferBtn = document.getElementById('deleteOfferBtn');
+            const offerForm = document.getElementById('offerForm');
+            const calendarEl = document.getElementById('calendar');
+            const offersListEl = document.getElementById('offersList');
+            const searchGlobalInput = document.getElementById('searchGlobal');
+            const filterWorkerSelect = document.getElementById('filterWorker');
+
+            const statusColors = { 'En Proceso': '#2563eb', 'Aceptado': '#10b981', 'Perdido': '#f43f5e' };
+            let savedOffers = JSON.parse(localStorage.getItem('portal_offers')) || [];
+
+            // Inicializar Calendario
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                events: function(info, successCallback, failureCallback) {
+                    successCallback(formatOffersForCalendar(obtenerOfertasFiltradas()));
+                },
+                eventClick: function(info) { abrirModalParaEditar(info.event.id); }
+            });
+            calendar.render();
+
+            searchGlobalInput.addEventListener('input', filtrarYRefrescar);
+            filterWorkerSelect.addEventListener('change', filtrarYRefrescar);
+
+            poblarFiltroTrabajadores();
+            renderizarInterfazCompleta();
+
+            function formatOffersForCalendar(offers) {
+                return offers.map(off => ({
+                    id: off.id,
+                    title: `[${off.portal}] ${off.title} - $${Number(off.amount).toLocaleString('es-CL')}`,
+                    start: off.endDate,
+                    backgroundColor: statusColors[off.status] || '#475569',
+                    borderColor: statusColors[off.status] || '#475569'
+                }));
+            }
+
+            function obtenerOfertasFiltradas() {
+                const busqueda = searchGlobalInput.value.toLowerCase();
+                const trabajadorSeleccionado = filterWorkerSelect.value;
+
+                return savedOffers.filter(off => {
+                    const cumpleBusqueda = off.title.toLowerCase().includes(busqueda) || off.portal.toLowerCase().includes(busqueda);
+                    const cumpleTrabajador = trabajadorSeleccionado === "" || off.worker === trabajadorSeleccionado;
+                    return cumpleBusqueda && cumpleTrabajador;
+                });
+            }
+
+            function filtrarYRefrescar() {
+                calendar.refetchEvents();
+                renderizarListaLateral(obtenerOfertasFiltradas());
+            }
+
+            function poblarFiltroTrabajadores() {
+                const trabajadoresUnicos = [...new Set(savedOffers.map(o => o.worker))];
+                filterWorkerSelect.innerHTML = '<option value="">👤 Todos los trabajadores</option>';
+                trabajadoresUnicos.forEach(t => {
+                    if(t) filterWorkerSelect.innerHTML += `<option value="${t}">${t}</option>`;
+                });
+            }
+
+            function renderizarInterfazCompleta() {
+                const sumAccepted = savedOffers.filter(o => o.status === 'Aceptado').reduce((acc, o) => acc + Number(o.amount || 0), 0);
+                const sumProcess = savedOffers.filter(o => o.status === 'En Proceso').reduce((acc, o) => acc + Number(o.amount || 0), 0);
+
+                document.getElementById('fin-accepted').textContent = `$${sumAccepted.toLocaleString('es-CL')}`;
+                document.getElementById('fin-process').textContent = `$${sumProcess.toLocaleString('es-CL')}`;
+
+                poblarFiltroTrabajadores();
+                renderizarListaLateral(obtenerOfertasFiltradas());
+            }
+
+            function renderizarListaLateral(ofertas) {
+                offersListEl.innerHTML = '';
+                if(ofertas.length === 0) {
+                    offersListEl.innerHTML = '<p style="font-size:12px; color:gray; text-align:center; margin-top:10px;">Sin coincidencias</p>';
+                    return;
+                }
+
+                const ordenadas = [...ofertas].sort((a,b) => new Date(a.endDate) - new Date(b.endDate));
+
+                ordenadas.forEach(off => {
+                    const item = document.createElement('div');
+                    item.className = 'offer-item';
+                    const colorBadge = statusColors[off.status] || '#475569';
+
+                    // CÁLCULO DE DÍAS RESTANTES (Base 2026)
+                    const hoy = new Date();
+                    hoy.setHours(0,0,0,0);
+                    const fechaCierre = new Date(off.endDate + 'T00:00:00');
+                    const diferenciaTiempo = fechaCierre.getTime() - hoy.getTime();
+                    const diasRestantes = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
+
+                    let badgeClase = 'days-normal';
+                    let badgeTexto = `Faltan ${diasRestantes} d`;
+
+                    if (off.status !== 'En Proceso') {
+                        badgeTexto = 'Cerrado';
+                    } else if (diasRestantes < 0) {
+                        badgeTexto = 'Vencido';
+                    } else if (diasRestantes === 0) {
+                        badgeTexto = '¡Cierra Hoy!';
+                        badgeClase = 'days-danger';
+                    } else if (diasRestantes <= 2) {
+                        badgeTexto = `${diasRestantes} d crít.`;
+                        badgeClase = 'days-warning';
+                    }
+
+                    item.innerHTML = `
+                        <div class="offer-item-title">${off.title}</div>
+                        <span class="days-badge ${badgeClase}">${badgeTexto}</span>
+                        <div class="offer-item-meta">
+                            <span>${off.portal} • <b>${off.worker}</b></span>
+                        </div>
+                        <div style="font-size: 12px; font-weight: 600; color: #334155;">$${Number(off.amount).toLocaleString('es-CL')} <span class="badge-status" style="background-color: ${colorBadge}; float:right;">${off.status}</span></div>
+                    `;
+
+                    item.addEventListener('click', () => {
+                        calendar.gotoDate(off.endDate);
+                        abrirModalParaEditar(off.id);
+                    });
+
+                    offersListEl.appendChild(item);
+                });
+            }
+
+            openModalBtn.addEventListener('click', () => {
+                offerForm.reset();
+                document.getElementById('offerId').value = '';
+                document.getElementById('modalTitle').textContent = 'Registrar Nueva Oferta';
+                document.getElementById('dateParticipation').value = new Date().toISOString().split('T')[0];
+                deleteOfferBtn.style.display = 'none';
+                modal.style.display = 'flex';
+            });
+
+            function abrirModalParaEditar(id) {
+                const oferta = savedOffers.find(o => o.id === id);
+                if (!oferta) return;
+
+                document.getElementById('offerId').value = oferta.id;
+                document.getElementById('portal').value = oferta.portal;
+                document.getElementById('title').value = oferta.title;
+                document.getElementById('worker').value = oferta.worker;
+                document.getElementById('amount').value = oferta.amount || 0;
+                document.getElementById('status').value = oferta.status;
+                document.getElementById('dateParticipation').value = oferta.participationDate;
+                document.getElementById('endDate').value = oferta.endDate;
+
+                document.getElementById('modalTitle').textContent = 'Modificar / Seguir Oferta';
+                deleteOfferBtn.style.display = 'block';
+                modal.style.display = 'flex';
+            }
+
+            offerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const idActual = document.getElementById('offerId').value;
+
+                const datos = {
+                    portal: document.getElementById('portal').value,
+                    title: document.getElementById('title').value,
+                    worker: document.getElementById('worker').value,
+                    amount: document.getElementById('amount').value,
+                    status: document.getElementById('status').value,
+                    participationDate: document.getElementById('dateParticipation').value,
+                    endDate: document.getElementById('endDate').value
+                };
+
+                if (idActual) {
+                    savedOffers = savedOffers.map(o => o.id === idActual ? { ...o, ...datos } : o);
+                } else {
+                    datos.id = Date.now().toString();
+                    savedOffers.push(datos);
+                }
+
+                persistirYActualizar();
+                modal.style.display = 'none';
+            });
+
+            deleteOfferBtn.addEventListener('click', () => {
+                const idActual = document.getElementById('offerId').value;
+                if (idActual && confirm('¿Eliminar esta oferta permanentemente?')) {
+                    savedOffers = savedOffers.filter(o => o.id !== idActual);
+                    persistirYActualizar();
+                    modal.style.display = 'none';
+                }
+            });
+
+            function persistirYActualizar() {
+                localStorage.setItem('portal_offers', JSON.stringify(savedOffers));
+                calendar.refetchEvents();
+                renderizarInterfazCompleta();
+            }
+
+            closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+            window.addEventListener('click', (e) => { if(e.target === modal) modal.style.display = 'none'; });
+        });
+    </script>
+</body>
+</html>
