@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/png" href="logo2.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Control de Ofertas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+            <!-- Grupo de Usuario -->
+            <div class="input-group">
+                <label for="username">Usuario o Correo Electrónico</label>
+                <input type="text" id="username" name="username" placeholder="Ej: admin" required>
+            </div>
+            
+            <!-- Grupo de Contraseña -->
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" placeholder="********" required>
+            </div>
+
+            <!-- Recordarme y Olvidé Contraseña -->
+            <div class="actions">
+                <label>
+                    <input type="checkbox" name="remember">Recordarme
+                </label>
+                <a href="#">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <!-- Botón de Entrada -->
+            <button type="submit" class="btn-submit">Ingresar</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const usuario = document.getElementById("username").value.trim();
+            const contrasena = document.getElementById("password").value.trim();
+
+            // Validar credenciales de acceso (admin / 12345)
+            if (usuario === "admin" && contrasena === "12345") {
+                localStorage.setItem("logged_in", "true");
+                window.location.href = "dashboard.html";
+            } else {
+                alert("Usuario o contraseña incorrectos. (Prueba con usuario: admin y clave: 12345)");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.welcome-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.welcome-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgb(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+h1 {
+    color: #333333;
+    margin-bottom: 16px;
+    font-size: 28px;
+}
+
+p {
+    color: #666666;
+    line-height: 1.6;
+    margin-bottom: 32px;
+}
+
+.btn-logout {
+    padding: 12px 28px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.btn-logout:hover {
+    background: #bd2130;
+}
+
+.btn-logout:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 480px) {
+    boody{
+        background: #ffffff;
+        padding: 15px;
+    }
+
+    .welcome-card {
+        padding: 24px 16px;
+        box-shadow: none;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+}
+
