@@ -126,9 +126,31 @@
 
         /* ÁREA PRINCIPAL CONTENEDORA */
         .main-content {
-            flex: 1; padding: 20px; box-sizing: border-box; overflow-y: auto; height: 100vh;
+            flex: 1; 
+            padding: 24px; 
+            box-sizing: border-box; 
+            height: 100vh;
+            overflow: hidden; /* CLAVE: Evita que el contenedor principal crezca */
+            display: flex;
+            flex-direction: column;
         }
-        .calendar-card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+        .calendar-card { 
+            background: var(--surface); 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            flex: 1; 
+            display: flex;
+            flex-direction: column;
+            min-height: 0; 
+            overflow: hidden; 
+        }
+
+        #calendar {
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+        }
 
         /* BOTONES */
         .btn-primary { background-color: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: inherit; }
@@ -333,9 +355,13 @@
         const searchGlobalInput = document.getElementById('searchGlobal');
         const filterWorkerSelect = document.getElementById('filterWorker');
 
+        // CALENDARIO - FORZANDO AJUSTE INTERNO DE FILAS
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'es',
+            height: '100%', 
+            expandRows: true, // CLAVE: Obliga a las celdas a encogerse/estirarse sin romper el contenedor
+            handleWindowResize: true, // Fuerza el recálculo al hacer zoom
             headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
             events: function(info, successCallback, failureCallback) {
                 successCallback(formatOffersForCalendar(obtenerOfertasFiltradas()));
@@ -343,6 +369,13 @@
             eventClick: function(info) { abrirModalParaEditar(info.event.id); }
         });
         calendar.render();
+
+        // Truco adicional: forzar recálculo del calendario si el usuario hace zoom
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                calendar.updateSize();
+            }, 100);
+        });
 
         // 1. OBTENER EL VALOR DEL DÓLAR
         async function obtenerValorDolar() {
