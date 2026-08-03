@@ -175,25 +175,27 @@
             <p class="profile-role">Gestor de Licitaciones - APPAREIL</p>
         </div>
 
-        <!-- Conversión Financiera -->
+        <!-- Conversión Financiera con Dólar Automático -->
         <div class="finance-panel">
-            <div class="finance-title">Conversión Financiera</div>
-            <div class="finance-row">
-                <span>Aprobado (CLP):</span>
-                <span id="fin-accepted-clp" class="fin-accepted">$0</span>
+            <div class="finance-title" style="margin-bottom: 12px;">
+                Resumen Financiero <br>
+                <span style="font-size: 9px; color: #3b82f6;">Valor Dólar Hoy: <span id="valor-dolar-text">Cargando...</span></span>
             </div>
-            <div class="finance-row">
-                <span>Aprobado (USD):</span>
-                <span id="fin-accepted-usd" class="fin-accepted">US$0</span>
+            
+            <div style="font-size: 10px; color: var(--status-accepted); font-weight: 700; margin-bottom: 4px;">OFERTAS ACEPTADAS</div>
+            <div class="finance-row" style="color: #64748b;"><span>En Pesos:</span> <span id="fin-accepted-clp">$0</span></div>
+            <div class="finance-row" style="color: #64748b;"><span>En Dólares:</span> <span id="fin-accepted-usd">US$0</span></div>
+            <div class="finance-row" style="background: #ecfdf5; padding: 4px; border-radius: 4px; margin-top: 4px;">
+                <span>Consolidado (CLP):</span> <span id="fin-accepted-total" class="fin-accepted">$0</span>
             </div>
-            <hr style="border: 0; border-top: 1px dashed var(--border); margin: 6px 0;">
-            <div class="finance-row">
-                <span>En Juego (CLP):</span>
-                <span id="fin-process-clp" class="fin-process">$0</span>
-            </div>
-            <div class="finance-row">
-                <span>En Juego (USD):</span>
-                <span id="fin-process-usd" class="fin-process">US$0</span>
+
+            <hr style="border: 0; border-top: 1px dashed var(--border); margin: 10px 0;">
+
+            <div style="font-size: 10px; color: var(--status-process); font-weight: 700; margin-bottom: 4px;">OFERTAS EN PROCESO</div>
+            <div class="finance-row" style="color: #64748b;"><span>En Pesos:</span> <span id="fin-process-clp">$0</span></div>
+            <div class="finance-row" style="color: #64748b;"><span>En Dólares:</span> <span id="fin-process-usd">US$0</span></div>
+            <div class="finance-row" style="background: #eff6ff; padding: 4px; border-radius: 4px; margin-top: 4px;">
+                <span>Consolidado (CLP):</span> <span id="fin-process-total" class="fin-process">$0</span>
             </div>
         </div>
 
@@ -302,7 +304,7 @@
         </div>
     </div>
 
-    <!-- AQUÍ EMPIEZA LA MAGIA DE SUPABASE -->
+    <!-- AQUÍ EMPIEZA LA MAGIA DE SUPABASE Y JAVASCRIPT -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
@@ -318,6 +320,7 @@
         });
 
         let savedOffers = [];
+        let valorDolar = 0; // VARIABLE GLOBAL PARA GUARDAR EL PRECIO DEL DÓLAR
         const statusColors = { 'En Proceso': '#2563eb', 'Aceptado': '#10b981', 'Perdido': '#f43f5e' };
         
         const modal = document.getElementById('offerModal');
@@ -341,7 +344,24 @@
         });
         calendar.render();
 
-        async function cargarOfertasDesdeSupabase() {
+        // 1. OBTENER EL VALOR DEL DÓLAR
+        async function obtenerValorDolar() {
+            try {
+                const response = await fetch('https://mindicador.cl/api/dolar');
+                const data = await response.json();
+                valorDolar = data.serie[0].valor; 
+                document.getElementById('valor-dolar-text').textContent = formatearMonto(valorDolar, 'CLP');
+            } catch (error) {
+                console.error("Error obteniendo el dólar:", error);
+                document.getElementById('valor-dolar-text').textContent = "No disponible";
+                valorDolar = 900; // Valor de respaldo por si se cae la página del gobierno
+            }
+        }
+
+        // 2. OBTENER LOS DATOS DE SUPABASE Y CARGAR TODO
+        async function inicializarDashboard() {
+            await obtenerValorDolar(); // Primero traemos el dólar
+            
             const { data, error } = await supabase
                 .from('ofertas')
                 .select('*');
@@ -356,7 +376,8 @@
             renderizarInterfazCompleta();
         }
 
-        cargarOfertasDesdeSupabase();
+        // Arrancamos el dashboard
+        inicializarDashboard();
 
         searchGlobalInput.addEventListener('input', filtrarYRefrescar);
         filterWorkerSelect.addEventListener('change', filtrarYRefrescar);
@@ -406,7 +427,7 @@
                 } else {
                     alert(idActual ? "¡Licitación actualizada con éxito!" : "¡Licitación guardada con éxito!");
                     modal.style.display = 'none';
-                    await cargarOfertasDesdeSupabase();
+                    await inicializarDashboard(); // Recargamos para ver los cambios
                 }
 
             } catch (err) {
@@ -427,7 +448,7 @@
                     alert("Error al eliminar: " + error.message);
                 } else {
                     modal.style.display = 'none';
-                    await cargarOfertasDesdeSupabase();
+                    await inicializarDashboard(); // Recargamos la lista
                 }
             }
         });
@@ -455,6 +476,7 @@
         function filtrarYRefrescar() {
             calendar.refetchEvents();
             renderizarListaLateral(obtenerOfertasFiltradas());
+            actualizarVistaFinanciera(obtenerOfertasFiltradas()); // Refresca los números al buscar
         }
 
         function poblarFiltroTrabajadores() {
@@ -479,7 +501,9 @@
             });
         }
 
+        // --- NUEVA CALCULADORA FINANCIERA CON CONVERSIÓN DE DÓLARES ---
         function actualizarVistaFinanciera(ofertasFiltradas) {
+            // ACEPTADOS
             const sumAcceptedCLP = ofertasFiltradas
                 .filter(o => o.status === 'Aceptado' && (o.currency === 'CLP' || !o.currency))
                 .reduce((acc, o) => acc + Number(o.amount || 0), 0);
@@ -488,6 +512,7 @@
                 .filter(o => o.status === 'Aceptado' && o.currency === 'USD')
                 .reduce((acc, o) => acc + Number(o.amount || 0), 0);
 
+            // EN PROCESO
             const sumProcessCLP = ofertasFiltradas
                 .filter(o => o.status === 'En Proceso' && (o.currency === 'CLP' || !o.currency))
                 .reduce((acc, o) => acc + Number(o.amount || 0), 0);
@@ -496,10 +521,18 @@
                 .filter(o => o.status === 'En Proceso' && o.currency === 'USD')
                 .reduce((acc, o) => acc + Number(o.amount || 0), 0);
 
+            // CÁLCULO TOTAL CONSOLIDADO
+            const totalConsolidadoAccepted = sumAcceptedCLP + (sumAcceptedUSD * valorDolar);
+            const totalConsolidadoProcess = sumProcessCLP + (sumProcessUSD * valorDolar);
+
+            // PINTAR EN PANTALLA
             document.getElementById('fin-accepted-clp').textContent = formatearMonto(sumAcceptedCLP, 'CLP');
             document.getElementById('fin-accepted-usd').textContent = formatearMonto(sumAcceptedUSD, 'USD');
+            document.getElementById('fin-accepted-total').textContent = formatearMonto(totalConsolidadoAccepted, 'CLP');
+
             document.getElementById('fin-process-clp').textContent = formatearMonto(sumProcessCLP, 'CLP');
             document.getElementById('fin-process-usd').textContent = formatearMonto(sumProcessUSD, 'USD');
+            document.getElementById('fin-process-total').textContent = formatearMonto(totalConsolidadoProcess, 'CLP');
         }
 
         function renderizarInterfazCompleta() {
