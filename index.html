@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Control de Ofertas</title>
     <link rel="stylesheet" href="style.css">
+    <!-- LIBRERÍA DE SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="login-wrapper">
@@ -20,8 +22,8 @@
             <form id="loginForm">
                 <!-- Grupo de Usuario -->
                 <div class="input-group">
-                    <label for="username">Usuario o Correo Electrónico</label>
-                    <input type="text" id="username" name="username" placeholder="Ej: admin" required>
+                    <label for="username">Correo Electrónico</label>
+                    <input type="email" id="username" name="username" placeholder="Ej: alopez@appareil.cl" required>
                 </div>
                 
                 <!-- Grupo de Contraseña -->
@@ -44,19 +46,53 @@
         </div>
     </div>
 
+    <!-- SCRIPT DE CONEXIÓN CON SUPABASE -->
     <script>
-        document.getElementById("loginForm").addEventListener("submit", function(event) {
+        // CREDENCIALES REALES DE TU PROYECTO APPAREIL
+        const SUPABASE_URL = 'https://qboawjjuzgijgtyjzqiw.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_HAuwDGL-5bWi5E2GHUBUKA_euUS1ig7';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.getElementById("loginForm").addEventListener("submit", async function(event) {
             event.preventDefault();
 
-            const usuario = document.getElementById("username").value.trim();
-            const contrasena = document.getElementById("password").value.trim();
+            const email = document.getElementById("username").value.trim().toLowerCase();
+            const password = document.getElementById("password").value.trim();
+            const btnSubmit = document.querySelector(".btn-submit");
 
-            // Validar credenciales de acceso (admin / 12345)
-            if (usuario === "admin" && contrasena === "12345") {
-                localStorage.setItem("logged_in", "true");
-                window.location.href = "dashboard.html";
-            } else {
-                alert("Usuario o contraseña incorrectos. (Prueba con usuario: admin y clave: 12345)");
+            // Validación de correo corporativo
+            if (!email.endsWith("@appareil.cl")) {
+                alert("Acceso denegado. Debes ingresar con un correo corporativo (@appareil.cl).");
+                return;
+            }
+
+            // Mostrar que está cargando
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Validando...";
+
+            try {
+                // Autenticar con Supabase
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) {
+                    alert("Correo o contraseña incorrectos. Verifica e intenta de nuevo.");
+                    console.error("Error de Supabase:", error.message);
+                } else {
+                    // Éxito: Guardar sesión y redirigir
+                    localStorage.setItem("logged_in", "true");
+                    localStorage.setItem("user_email", data.user.email);
+                    window.location.href = "dashboard.html";
+                }
+            } catch (err) {
+                alert("Ocurrió un error de conexión.");
+                console.error(err);
+            } finally {
+                // Restaurar el botón si hay error
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "Ingresar";
             }
         });
     </script>
