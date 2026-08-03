@@ -10,57 +10,102 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    padding: 20PX;
+    height: 100vh; /* Cambiamos min-height por height fijo */
+    padding: 16px;
 }
 
-.login-container {
-    background: #ffff;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba( 0, 0, 0, 0,1);
+/* ENVOLTORIO PRINCIPAL (Centra perfectamente todo el conjunto) */
+.login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    max-width: 400px;
-    box-sizing: border-box;
+    max-width: 380px; /* Un poco más compacto para mejor estética */
+    transform: translateY(-8vh);
+}
+
+/* ESTILOS PARA EL LOGO (Más compacto y con menos margen) */
+.login-logo {
+    margin-bottom: -50px; 
+    text-align: center;
+    display: flex;
+    justify-content: center;
+
+}
+
+.login-logo img {
+   width: 360px;      
+    max-width: 90%;    /* Asegura que no se salga en pantallas de celular */
+    height: auto;     
+    object-fit: contain;
+    display: block;
+}
+
+/* TARJETA DE LOGIN */
+.login-container {
+    background: #ffffff;
+    padding: 50px 60px; /* <-- Subimos de 28px 32px a 50px 60px */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    width: 100%;
 }
 
 h2 {
-    margin-bottom: 24px;
+    margin-bottom: 30px; 
     color: #333333;
     text-align: center;
+    font-size: 28px; 
+}
+
+.input-group {
+   margin-bottom: 24px;
 }
 
 .input-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: #666666;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .input-group input {
-    width: 100%;
-    padding: 12px;
+   width: 100%;
+    padding: 14px 16px; 
     border: 1px solid #cccccc;
     border-radius: 6px;
-    font-size: 16px;
+    font-size: 15px;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* Borde verde oliva al hacer focus */
 .input-group input:focus {
-    border-color: #0066cc;
+    border-color: #6b7a55;
+    box-shadow: 0 0 0 3px rgba(107, 122, 85, 0.15);
 }
 
 .actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    font-size: 14px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+.actions label {
+    color: #555555;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.actions input[type="checkbox"] {
+    accent-color: #6b7a55;
 }
 
 .actions a {
-    color: #0066cc;
+    color: #6b7a55;
     text-decoration: none;
 }
 
@@ -68,23 +113,25 @@ h2 {
     text-decoration: underline;
 }
 
+/* BOTÓN INGRESAR (#6b7a55) */
 .btn-submit {
     width: 100%;
-    padding: 12px;
-    background: #03818f;
+    padding: 14px; /* Botón más alto (antes 11px) */
+    background: #6b7a55;
     color: white;
     border: none;
     border-radius: 6px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.5s;
+    transition: background 0.3s ease;
 }
 
 .btn-submit:hover {
-    background: #08566c;
+    background: #454e37;
 }
 
+/* DISEÑO RESPONSIVO */
 @media (max-width: 480px) {
     body {
         background: #ffffff;
@@ -92,18 +139,23 @@ h2 {
     }
 
     .login-container {
-        padding: 24px 16px;
+        padding: 20px 16px;
         box-shadow: none;
     }
 
+    .login-logo img {
+        max-width: 140px;
+        
+    }
+
     h2 {
-        margin-bottom: 20px;
-        font-size: 24px;
+        margin-bottom: 16px;
+        font-size: 20px;
     }
 
     .actions {
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
+        gap: 10px;
     }
 }
