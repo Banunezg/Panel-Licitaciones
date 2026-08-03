@@ -17,7 +17,7 @@
 
     <style>
         :root {
-            --primary: #2563eb;
+            --primary: #6b7a55;
             --background: #f1f5f9;
             --surface: #ffffff;
             --text: #0f172a;
@@ -70,6 +70,8 @@
             display: block;
             background-color: #ffffff;
             padding: 6px;
+            margin-bottom: -20px;
+            margin-top: -35px;
         }
 
         .profile-name { font-size: 15px; font-weight: 600; margin: 0; }
@@ -130,7 +132,7 @@
 
         /* BOTONES */
         .btn-primary { background-color: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: inherit; }
-        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-primary:hover { background-color: #454e37; }
         .btn-logout { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 8px; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: inherit; font-size: 13px; }
         .btn-logout:hover { background-color: var(--danger); color: white; }
         .btn-danger { background-color: var(--danger); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: inherit; }
@@ -183,11 +185,11 @@
         <div class="finance-panel">
             <div class="finance-title">Conversión Financiera</div>
             <div class="finance-row">
-                <span>Adjudicado (CLP):</span>
+                <span>Aprobado (CLP):</span>
                 <span id="fin-accepted-clp" class="fin-accepted">$0</span>
             </div>
             <div class="finance-row">
-                <span>Adjudicado (USD):</span>
+                <span>Aprobado (USD):</span>
                 <span id="fin-accepted-usd" class="fin-accepted">US$0</span>
             </div>
             <hr style="border: 0; border-top: 1px dashed var(--border); margin: 6px 0;">
@@ -254,7 +256,16 @@
 
                 <div class="form-group">
                     <label for="worker">Trabajador Responsable</label>
-                    <input type="text" id="worker" placeholder="Ej: Juan Pérez" required>
+                    <select id="worker" required>
+                        <option value="" disabled selected>Seleccione un responsable...</option>
+                        <option value="David Parra">David Parra</option>
+                        <option value="Diego Serrano">Diego Serrano</option>
+                        <option value="Matias Barrientos">Matias Barrientos</option>
+                        <option value="Matias Paz">Matias Paz</option>
+                        <option value="Andrea Lopez">Andrea Lopez</option>
+                        <option value="Bastián Núñez">Bastián Núñez</option>
+                        <option value="Bastián Núñez">Veronica Yañez</option>
+                    </select>
                 </div>
 
                 <!-- CAMPO DE MONTO Y MONEDA -->
@@ -446,10 +457,20 @@
 
         function poblarFiltroTrabajadores() {
             const trabajadorActual = filterWorkerSelect.value;
-            const trabajadoresUnicos = [...new Set(savedOffers.map(o => o.worker))].filter(Boolean);
+            
+            const listaTrabajadores = [
+                "David Parra",
+                "Diego Serrano",
+                "Matias Barrientos",
+                "Matias Paz",
+                "Andrea Lopez",
+                "Bastián Núñez",
+                "Veronica Yañez"
+            ];
             
             filterWorkerSelect.innerHTML = '<option value="">👤 Todos los trabajadores</option>';
-            trabajadoresUnicos.forEach(t => {
+            
+            listaTrabajadores.forEach(t => {
                 const selected = t === trabajadorActual ? 'selected' : '';
                 filterWorkerSelect.innerHTML += `<option value="${t}" ${selected}>${t}</option>`;
             });
