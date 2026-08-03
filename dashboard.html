@@ -167,17 +167,11 @@
 </head>
 <body>
 
-    <script>
-        if (localStorage.getItem('logged_in') !== 'true') {
-            window.location.href = 'index.html';                
-        }
-    </script>
-
     <!-- BARRA LATERAL (SIDEBAR) -->
     <aside class="sidebar">
         <div class="profile-section">
             <img src="Logo.png" alt="Logo APPAREIL" class="profile-logo">
-            <h2 class="profile-name">Administrador</h2>
+            <h2 class="profile-name">Panel Principal</h2>
             <p class="profile-role">Gestor de Licitaciones - APPAREIL</p>
         </div>
 
@@ -258,13 +252,14 @@
                     <label for="worker">Trabajador Responsable</label>
                     <select id="worker" required>
                         <option value="" disabled selected>Seleccione un responsable...</option>
-                        <option value="David Parra">David Parra</option>
-                        <option value="Diego Serrano">Diego Serrano</option>
-                        <option value="Matias Barrientos">Matias Barrientos</option>
-                        <option value="Matias Paz">Matias Paz</option>
-                        <option value="Andrea Lopez">Andrea Lopez</option>
-                        <option value="Bastián Núñez">Bastián Núñez</option>
-                        <option value="Bastián Núñez">Veronica Yañez</option>
+                        <option value="alopez@appareil.cl">A. López</option>
+                        <option value="dserrano@appareil.cl">D. Serrano</option>
+                        <option value="mbarrientos@appareil.cl">M. Barrientos</option>
+                        <option value="mpaz@appareil.cl">M. Paz</option>
+                        <option value="dparra@appareil.cl">D. Parra</option>
+                        <option value="eibanez@appareil.cl">E. Ibañez</option>
+                        <option value="vayanez@appareil.cl">V. Yañez</option>
+                        <option value="bnunez@appareil.cl">B. Nuñez</option>
                     </select>
                 </div>
 
@@ -314,6 +309,13 @@
         const supabaseUrl = 'https://qboawjjuzgijgtyjzqiw.supabase.co';
         const supabaseKey = 'sb_publishable_HAuwDGL-5bWi5E2GHUBUKA_euUS1ig7'; 
         const supabase = createClient(supabaseUrl, supabaseKey);
+
+        // NUEVO GUARDIA DE SEGURIDAD
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!session) {
+                window.location.href = 'index.html';
+            }
+        });
 
         let savedOffers = [];
         const statusColors = { 'En Proceso': '#2563eb', 'Aceptado': '#10b981', 'Perdido': '#f43f5e' };
@@ -459,25 +461,25 @@
             const trabajadorActual = filterWorkerSelect.value;
             
             const listaTrabajadores = [
-                "David Parra",
-                "Diego Serrano",
-                "Matias Barrientos",
-                "Matias Paz",
-                "Andrea Lopez",
-                "Bastián Núñez",
-                "Veronica Yañez"
+                {email: "alopez@appareil.cl", name: "A. López"},
+                {email: "dserrano@appareil.cl", name: "D. Serrano"},
+                {email: "mbarrientos@appareil.cl", name: "M. Barrientos"},
+                {email: "mpaz@appareil.cl", name: "M. Paz"},
+                {email: "dparra@appareil.cl", name: "D. Parra"},
+                {email: "eibanez@appareil.cl", name: "E. Ibañez"},
+                {email: "vayanez@appareil.cl", name: "V. Yañez"},
+                {email: "bnunez@appareil.cl", name: "B. Nuñez"}
             ];
             
             filterWorkerSelect.innerHTML = '<option value="">👤 Todos los trabajadores</option>';
             
             listaTrabajadores.forEach(t => {
-                const selected = t === trabajadorActual ? 'selected' : '';
-                filterWorkerSelect.innerHTML += `<option value="${t}" ${selected}>${t}</option>`;
+                const selected = t.email === trabajadorActual ? 'selected' : '';
+                filterWorkerSelect.innerHTML += `<option value="${t.email}" ${selected}>${t.name}</option>`;
             });
         }
 
         function actualizarVistaFinanciera(ofertasFiltradas) {
-            // Totales Aceptados
             const sumAcceptedCLP = ofertasFiltradas
                 .filter(o => o.status === 'Aceptado' && (o.currency === 'CLP' || !o.currency))
                 .reduce((acc, o) => acc + Number(o.amount || 0), 0);
@@ -486,7 +488,6 @@
                 .filter(o => o.status === 'Aceptado' && o.currency === 'USD')
                 .reduce((acc, o) => acc + Number(o.amount || 0), 0);
 
-            // Totales En Proceso
             const sumProcessCLP = ofertasFiltradas
                 .filter(o => o.status === 'En Proceso' && (o.currency === 'CLP' || !o.currency))
                 .reduce((acc, o) => acc + Number(o.amount || 0), 0);
@@ -543,11 +544,25 @@
                     badgeClase = 'days-warning';
                 }
 
+                // Convertimos el correo en el nombre visible para la lista lateral
+                const trabajadorObj = [
+                    {email: "alopez@appareil.cl", name: "A. López"},
+                    {email: "dserrano@appareil.cl", name: "D. Serrano"},
+                    {email: "mbarrientos@appareil.cl", name: "M. Barrientos"},
+                    {email: "mpaz@appareil.cl", name: "M. Paz"},
+                    {email: "dparra@appareil.cl", name: "D. Parra"},
+                    {email: "eibanez@appareil.cl", name: "E. Ibañez"},
+                    {email: "vayanez@appareil.cl", name: "V. Yañez"},
+                    {email: "bnunez@appareil.cl", name: "B. Nuñez"}
+                ].find(t => t.email === off.worker);
+                
+                const nombreVisible = trabajadorObj ? trabajadorObj.name : off.worker;
+
                 item.innerHTML = `
                     <div class="offer-item-title">${off.title}</div>
                     <span class="days-badge ${badgeClase}">${badgeTexto}</span>
                     <div class="offer-item-meta">
-                        <span>${off.portal} • <b>${off.worker}</b></span>
+                        <span>${off.portal} • <b>${nombreVisible}</b></span>
                     </div>
                     <div style="font-size: 12px; font-weight: 600; color: #334155;">
                         ${formatearMonto(off.amount, off.currency)} 
@@ -595,8 +610,10 @@
 
         closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
         window.addEventListener('click', (e) => { if(e.target === modal) modal.style.display = 'none'; });
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('logged_in');
+        
+        // ACTUALIZACIÓN DEL BOTÓN CERRAR SESIÓN
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await supabase.auth.signOut();
             window.location.href = 'index.html';
         });
     </script>
