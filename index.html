@@ -23,7 +23,7 @@
                 <!-- Grupo de Usuario -->
                 <div class="input-group">
                     <label for="username">Correo Electrónico</label>
-                    <input type="email" id="username" name="username" placeholder="Ej: appareil@appareil.cl" required>
+                    <input type="email" id="username" name="username" placeholder="Ej: alopez@appareil.cl" required>
                 </div>
                 
                 <!-- Grupo de Contraseña -->
@@ -51,7 +51,9 @@
         // CREDENCIALES REALES DE TU PROYECTO APPAREIL
         const SUPABASE_URL = 'https://qboawjjuzgijgtyjzqiw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_HAuwDGL-5bWi5E2GHUBUKA_euUS1ig7';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // SOLUCIÓN: Cambiamos el nombre a 'supabaseClient' para evitar choques con la librería global
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         document.getElementById("loginForm").addEventListener("submit", async function(event) {
             event.preventDefault();
@@ -71,8 +73,8 @@
             btnSubmit.textContent = "Validando...";
 
             try {
-                // Autenticar con Supabase
-                const { data, error } = await supabase.auth.signInWithPassword({
+                // Autenticar con Supabase usando la nueva variable
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password,
                 });
@@ -81,7 +83,7 @@
                     alert("Correo o contraseña incorrectos. Verifica e intenta de nuevo.");
                     console.error("Error de Supabase:", error.message);
                 } else {
-                    // Éxito: Guardar sesión y redirigir
+                    // Éxito: Guardar sesión y redirigir (Usando el método rápido que funciona con tu Dashboard)
                     localStorage.setItem("logged_in", "true");
                     localStorage.setItem("user_email", data.user.email);
                     window.location.href = "dashboard.html";
