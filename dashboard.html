@@ -46,18 +46,21 @@
 
         /* BARRA LATERAL (SIDEBAR) RESPONSIVE */
         .sidebar {
-            width: 340px;
+            width: 360px; 
             background-color: var(--surface);
             border-right: 1px solid var(--border);
             display: flex; flex-direction: column;
-            padding: 20px; box-sizing: border-box;
+            padding: 28px; 
+            box-sizing: border-box;
             height: 100vh;
             flex-shrink: 0;
         }
 
         .profile-section {
-            text-align: center; padding-bottom: 12px;
-            border-bottom: 1px solid var(--border); margin-bottom: 12px;
+            text-align: center; 
+            padding-bottom: 20px; 
+            border-bottom: 1px solid var(--border); 
+            margin-bottom: 24px; 
         }
 
         .profile-logo {
@@ -66,53 +69,56 @@
             height: auto;
             object-fit: contain;
             border-radius: 8px;
-            margin: 0 auto 12px auto;
+            margin: 0 auto 16px auto; 
             display: block;
             background-color: #ffffff;
             padding: 6px;
-            margin-bottom: -20px;
-            margin-top: -35px;
         }
 
-        .profile-name { font-size: 15px; font-weight: 600; margin: 0; }
-        .profile-role { font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0; }
+        .profile-name { font-size: 16px; font-weight: 600; margin: 0; }
+        .profile-role { font-size: 12px; color: var(--text-muted); margin: 6px 0 0 0; }
 
         /* CONVERSIÓN FINANCIERA */
         .finance-panel {
             background-color: #f8fafc; border: 1px solid var(--border);
-            border-radius: 8px; padding: 10px; margin-bottom: 14px;
+            border-radius: 8px; 
+            padding: 16px; 
+            margin-bottom: 24px;
         }
-        .finance-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
-        .finance-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 500; }
+        .finance-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+        .finance-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; font-weight: 500; }
         .fin-accepted { color: #047857; font-weight: 600; }
         .fin-process { color: #1d4ed8; font-weight: 600; }
 
         /* BUSCADOR Y FILTROS */
-        .filter-panel { margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px; }
+        .filter-panel { margin-bottom: 24px; display: flex; flex-direction: column; gap: 12px; }
         .filter-input {
-            width: 100%; padding: 6px 10px; border: 1px solid var(--border);
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid var(--border);
             border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 13px;
         }
 
         /* LISTADO DE OFERTAS */
-        .offers-list-container { flex: 1; overflow-y: auto; margin-bottom: 14px; padding-right: 2px; }
-        .sidebar-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+        .offers-list-container { flex: 1; overflow-y: auto; margin-bottom: 24px; padding-right: 6px; }
+        .sidebar-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
         
         .offer-item {
-            padding: 10px; border: 1px solid var(--border); border-radius: 6px;
-            margin-bottom: 6px; cursor: pointer; transition: all 0.2s; background-color: #fafafa;
+            padding: 14px; /* Tarjetas de ofertas más amplias */
+            border: 1px solid var(--border); border-radius: 6px;
+            margin-bottom: 10px; cursor: pointer; transition: all 0.2s; background-color: #fafafa;
             position: relative;
         }
-        .offer-item:hover { background-color: #f1f5f9; border-color: #cbd5e1; }
-        .offer-item-title { font-size: 13px; font-weight: 600; margin: 0 0 4px 0; width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .offer-item-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+       .offer-item:hover { background-color: #f1f5f9; border-color: #cbd5e1; }
+        .offer-item-title { font-size: 13px; font-weight: 600; margin: 0 0 6px 0; width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .offer-item-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
         
         /* CONTADOR DE DÍAS RESTANTES */
         .days-badge {
-            position: absolute; top: 10px; right: 10px;
-            font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+            position: absolute; top: 12px; right: 12px;
+            font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px;
         }
-        .days-normal { background-color: #e2e8f0; color: #475569; }
+       .days-normal { background-color: #e2e8f0; color: #475569; }
         .days-warning { background-color: #ffedd5; color: #c2410c; }
         .days-danger { background-color: #fee2e2; color: #b91c1c; animation: pulse 2s infinite; }
 
@@ -120,10 +126,10 @@
             0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; }
         }
 
-        .badge-status { padding: 1px 5px; border-radius: 4px; font-weight: 600; color: white; font-size: 9px; }
+        .badge-status { padding: 2px 6px; border-radius: 4px; font-weight: 600; color: white; font-size: 10px; }
 
-        .sidebar-actions { display: flex; flex-direction: column; gap: 8px; }
-
+        .sidebar-actions { display: flex; flex-direction: column; gap: 14px; }
+        
         /* ÁREA PRINCIPAL CONTENEDORA */
         .main-content {
             flex: 1; 
